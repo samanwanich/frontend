@@ -1,4 +1,4 @@
-อันดับแรกเค้า export database มาให้แล้วนะ เป็นไฟล์ชื่อ project.sql
+อันดับแรกเค้า export database มาให้แล้วนะ เป็นไฟล์ชื่อ project.sql อยู่ในโฟลเดอร์ backend นะ
 1. สร้าง database ชื่ออะไรก็ได้นะ
 2. กดปุ่ม import อยู่บนแถบเมนูแถวกลางๆ
 3. เลือกไฟล์ project.sql เลื่อนลงมาแล้ว import โลด
