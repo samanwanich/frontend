@@ -11,7 +11,6 @@ const db = mysql.createConnection({ //ทั้งหมดข้างล่า
   database: process.env.database // Name of your database
 });
 
-
 db.connect((err) => {
   if (err) {
     console.error('Database connection failed: ' + err.stack);
@@ -19,6 +18,43 @@ db.connect((err) => {
   }
   console.log('Connected to the database.');
 });
+
+router.post('/student/login', (req, res) => {
+  const { studentId, identification } = req.body;
+
+  // SQL query to select the required fields
+  const query = `
+    SELECT studentId, name, lastname, status
+    FROM student 
+    WHERE studentId = ? AND identification = ?
+  `;
+
+  db.query(query, [studentId, identification], (err, results) => {
+    if (err) {
+      console.error('SQL query failed: ', err);
+      return res.status(500).send('Server error');
+    }
+
+    // If student is found, return the data
+    if (results.length > 0) {
+      const student = results[0];
+
+      // Check if the status is either 'ไปกลับ' or 'ประจำ'
+      if (student.status === 'ไปกลับ' || student.status === 'ประจำ') {
+        student.role = 'student'; // Modify the status field to 'student'
+      }
+      else {
+        student.role = student.status;
+      }
+
+      return res.json(student); // Return the updated student data
+    } else {
+      // If no student matches, return an appropriate message
+      return res.status(404).json({ message: 'Student not found or invalid credentials' });
+    }
+  });
+});
+
 
 router.get('/student/query', (req, res) => {
   const query = 'SELECT * FROM student'; // Your SQL query to fetch student data
@@ -32,6 +68,57 @@ router.get('/student/query', (req, res) => {
 
     // Send the results as JSON
     return res.json(results.length ? results : []);
+  });
+});
+
+router.get('/teacher/:id', (req, res) => {
+  const teacher_id = req.params.id;
+
+  const query = `SELECT teacher.teacher_name, timetable.Name AS timetable_name, subject.subject, time.dayofweek, time.time FROM teacher
+INNER JOIN subject ON teacher.teacher_id = subject.teacher_id
+INNER JOIN time ON subject.subject_id = time.subject_id
+INNER JOIN timetable ON timetable.Timetable_id = time.Timetable_id
+WHERE teacher.teacher_id = ?`; // Your SQL query to fetch student data
+
+  db.query(query, [teacher_id], (err, results) => {
+    if (err) {
+      console.error('SQL query failed: ', err);
+      res.status(500).send('Server error');
+      return;
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send('Teacher not found'); // Handle case where no student is found
+    }
+    
+    // Send the results as JSON
+    res.json(results[0]);
+  });
+});
+
+router.get('/student/timetable/:id', (req, res) => {
+  const student_id = req.params.id;
+
+  const query = `SELECT student.name, student.lastname, subject.subject, time.time, teacher.teacher_name from student
+INNER JOIN timetable ON student.Timetable_id = timetable.Timetable_id
+INNER JOIN time ON time.Timetable_id = student.Timetable_id
+INNER JOIN subject ON subject.subject_id = time.subject_id
+INNER JOIN teacher ON teacher.teacher_id = subject.teacher_id
+WHERE student.studentId = ?`; // Your SQL query to fetch student data
+
+  db.query(query, [student_id], (err, results) => {
+    if (err) {
+      console.error('SQL query failed: ', err);
+      res.status(500).send('Server error');
+      return;
+    }
+
+    if (results.length === 0) {
+      return res.status(404); // Handle case where no student is found
+    }
+    
+    // Send the results as JSON
+    res.json(results);
   });
 });
 
@@ -71,7 +158,8 @@ router.post('/student/insert', (req, res) => {
         course: 'หลักสูตร',
         grade: 'ชั้น',
         room: 'ห้อง',
-        status: 'ไปกลับ/หอพัก'
+        status: 'ไปกลับ/หอพัก',
+        idCard: 'เลขบัตร ปชช.'
       },
       {
         studentId: 'รหัสนักเรียน',
@@ -81,7 +169,8 @@ router.post('/student/insert', (req, res) => {
         course: 'หลักสูตร',
         grade: 'ชั้น',
         room: 'ห้อง',
-        status: 'ไปกลับ/หอพัก'
+        status: 'ไปกลับ/หอพัก',
+        idCard: 'เลขบัตร ปชช.'
       }
     ]
   *///ถ้ามีคนเดียว ก็ใช้แค่ก้อนเดียว
@@ -92,17 +181,17 @@ router.post('/student/insert', (req, res) => {
   }
 
   // SQL query to insert a new student
-  const query = `INSERT INTO student (studentId, prefix, name, lastname, course, grade, room, status) 
+  const query = `INSERT INTO student (studentId, prefix, name, lastname, course, grade, room, status, identification) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   // Array to keep track of any errors during the insertion process
   const errors = [];
 
   students.forEach((student, index) => {
-    const { studentId, prefix, name, lastname, course, grade, room, status } = student;
+    const { studentId, prefix, name, lastname, course, grade, room, status, idCard } = student;
 
     // Values to be inserted for each  // ใช้ column name in database เพื่อความง่ายนะ ประกาศง่าย ดูง่าย จำง่าย
-    const values = [studentId, prefix, name, lastname, course, grade, room, status];
+    const values = [studentId, prefix, name, lastname, course, grade, room, status, idCard];
 
     // Execute the query for each student
     db.query(query, values, (err, result) => {

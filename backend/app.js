@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(userRoutes);
 
 // Swagger Docs route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use(swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Start the server
 app.listen(PORT, () => console.log(`Server started on PORT ${PORT} 🚀`));
