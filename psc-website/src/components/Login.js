@@ -66,7 +66,7 @@ function Login() {
                 console.log('User logged in successfully:', data.studentId);
     
                 // Redirect to home or another page
-                navigate('/');
+                navigate('/home');
             } else {
                 // Handle login failure
                 console.error('Login failed:', data.message);

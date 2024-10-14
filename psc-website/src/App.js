@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout'; // Your layout with navbar and sidebar
 import Login from './components/Login';
 import Home from './pages/Home';
+import InsertStudent from './pages/InsertStudent';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         {/* Routes that require authentication */}
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="home" element={<Home />} /> {/* Home rendered inside Layout */}
+          <Route path="/insert-student" element={<InsertStudent />} />
           {/* Add more child routes */}
         </Route>
       </Routes>

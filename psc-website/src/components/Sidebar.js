@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Sidebar({ isOpen, closeSidebar }) {
   const username = sessionStorage.getItem('username') || 'Guest';
@@ -17,7 +18,6 @@ function Sidebar({ isOpen, closeSidebar }) {
             <span>Welcome, <strong>{username}</strong></span><br />
             <a href="#" className="w3-bar-item w3-button"><i className="fa fa-envelope"></i></a>
             <a href="#" className="w3-bar-item w3-button"><i className="fa fa-user"></i></a>
-            <a href="#" className="w3-bar-item w3-button"><i className="fa fa-cog"></i></a>
           </div>
         </div>
         <hr />
@@ -25,10 +25,15 @@ function Sidebar({ isOpen, closeSidebar }) {
           {/* Additional content */}
         </div>
         <div className="w3-bar-block">
-          <a href="#" className="w3-bar-item w3-button w3-padding w3-blue"><i className="fa fa-users fa-fw"></i> ข้อมูลส่วนตัว</a>
-          <a href="#" className="w3-bar-item w3-button w3-padding"><i className="fa fa-eye fa-fw"></i> ดูผลการเรียน</a>
+          <Link to="/home" className="w3-bar-item w3-button w3-padding w3-blue">
+            <i className="fa fa-user fa-fw"></i> ข้อมูลส่วนตัว
+          </Link>
+          <a href="/" className="w3-bar-item w3-button w3-padding"><i className="fa fa-eye fa-fw"></i> ดูผลการเรียน</a>
           <a href="#" className="w3-bar-item w3-button w3-padding"><i className="fa fa-users fa-fw"></i> ตารางเรียน</a>
           <a href="#" className="w3-bar-item w3-button w3-padding"><i className="fa-solid fa-table-list"></i> ค้นหาตารางสอนอาจารย์</a>
+          <Link to="/insert-student" className="w3-bar-item w3-button w3-padding">
+            <i className="fa fa-users fa-fw"></i> Insert Student
+          </Link>
         </div>
       </nav>
 
