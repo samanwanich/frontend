@@ -3,6 +3,21 @@ const mysql = require('mysql');
 const router = express.Router();
 const dotenv = require('dotenv'); //ใช้เรียก library
 dotenv.config() //ใช้ dotenv ที่เราประกาศก่อนหน้าให้อ่าน config ในที่นี้คืออ่านไฟล์ .env จากโฟลเดอร์ backend
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit each IP to 20 login requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const dbRouteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // limit each IP to 300 DB-heavy requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const db = mysql.createConnection({ //ทั้งหมดข้างล่างนี้อ่านค่าจากไฟล์ .env โดยวิธีการเรียกคือ "process.env.ชื่อ"
   host: process.env.host, // XAMPP usually runs MySQL on localhost  
@@ -19,7 +34,7 @@ db.connect((err) => {
   console.log('Connected to the database.');
 });
 
-router.post('/student/login', (req, res) => {
+router.post('/student/login', loginLimiter, (req, res) => {
   const { studentId, identification } = req.body;
 
   // SQL query to select the required fields
@@ -56,7 +71,7 @@ router.post('/student/login', (req, res) => {
 });
 
 
-router.get('/student/query', (req, res) => {
+router.get('/student/query', dbRouteLimiter, (req, res) => {
   const query = 'SELECT * FROM student'; // Your SQL query to fetch student data
 
   db.query(query, (err, results) => {
@@ -71,7 +86,7 @@ router.get('/student/query', (req, res) => {
   });
 });
 
-router.get('/teacher/:id', (req, res) => {
+router.get('/teacher/:id', dbRouteLimiter, (req, res) => {
   const teacher_id = req.params.id;
 
   const query = `SELECT teacher.teacher_name, timetable.Name AS timetable_name, subject.subject, time.dayofweek, time.time FROM teacher
