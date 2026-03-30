@@ -12,6 +12,13 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const studentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 student data requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const dbRouteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 300, // limit each IP to 300 DB-heavy requests per windowMs
@@ -111,7 +118,7 @@ WHERE teacher.teacher_id = ?`; // Your SQL query to fetch student data
   });
 });
 
-router.get('/student/timetable/:id', (req, res) => {
+router.get('/student/timetable/:id', studentLimiter, (req, res) => {
   const student_id = req.params.id;
 
   const query = `SELECT student.name, student.lastname, subject.subject, time.time, teacher.teacher_name from student
@@ -139,7 +146,7 @@ WHERE student.studentId = ?`; // Your SQL query to fetch student data
 
 // Example route: Get a user by ID
 //ใช้เพื่อหาโปรไฟล์ของนักเรียนแต่ละคน อยากได้อะไรเพิ่มก็ INNER JOIN ด้วย key ต่างๆ ไม่เข้าใจก็ถามเค้าได้นะ มันยังไม่เสร็จดีน่ะ ต้องสร้าง table เพิ่ม
-router.get('/student/:id', (req, res) => {
+router.get('/student/:id', studentLimiter, (req, res) => {
   const studentId = req.params.id;
 
   const query = 'SELECT * FROM student WHERE studentId = ?'; // Your SQL query to fetch student data
