@@ -196,7 +196,7 @@ router.post('/student/insert', (req, res) => {
     // Execute the query for each student
     db.query(query, values, (err, result) => {
       if (err) {
-        console.error(`SQL query failed for student ${studentId}: `, err);
+        console.error('SQL query failed for student %s:', studentId, err);
         errors.push(`Failed to insert student with ID ${studentId}: ${err.message}`);
       }
 
